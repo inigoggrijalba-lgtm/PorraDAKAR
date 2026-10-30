@@ -43,7 +43,7 @@ export function Noticia({ n, mia, abierta: abiertaIni = false }) {
           <span style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', fontSize: 22, color: '#fff', textShadow: '0 1px 4px #000' }}>▶</span>
         </div>
         <div style={{ minWidth: 0 }}>
-          <div className="peq gris">{hora(n.publicada)} · {etapaNombre(n.etapa)}</div>
+          <div className="peq gris">{fecha(n.publicada)} · {hora(n.publicada)} · {etapaNombre(n.etapa)}</div>
           <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>{n.titulo}</div>
         </div>
       </a>
@@ -57,7 +57,7 @@ export function Noticia({ n, mia, abierta: abiertaIni = false }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="cab" style={{ alignItems: 'center' }}>
           <EtiquetaNoticia n={n} mia={mia} />
-          <span className="mono peq gris">{hora(n.publicada)}</span>
+          <span className="mono peq gris" style={{ whiteSpace: 'nowrap' }}>{fecha(n.publicada)} · {hora(n.publicada)}</span>
         </div>
         <div style={{ fontWeight: 700, fontSize: 15, marginTop: 4 }}>{n.titulo}</div>
         {abierta && n.imagen && <img src={n.imagen} alt="" loading="lazy" style={{ width: '100%', borderRadius: 10, marginTop: 8 }} />}
