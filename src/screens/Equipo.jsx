@@ -68,6 +68,27 @@ export default function Equipo() {
     }
   }
 
+  // Quita un piloto del equipo. Si ya estaba guardado, se quita también en la porra.
+  async function quitar(k) {
+    const resto = { ...picks };
+    delete resto[k];
+    setPicks(resto);
+    setCat(k);
+    setError('');
+    const guardado = (yo?.equipo || []).some((p) => p.cat === k);
+    if (!guardado) return;
+    setOcupado(true);
+    try {
+      await rpc('quitar_piloto', { p_id: jugador.id, p_token: jugador.token, p_cat: k });
+      await recargar();
+      avisar(`${CAT_CORTO[k]}: piloto quitado`);
+    } catch (e) {
+      setError(mensaje(e));
+    } finally {
+      setOcupado(false);
+    }
+  }
+
   const lista = porCat[cat];
   const grupos = cat === 'OBM' ? [['L', lista]] : ['A', 'B', 'C'].map((n) => [n, lista.filter((p) => p.nivel === n)]);
   const hint = cat === 'OBM' ? 'Original by Motul es libre: elige a quien quieras, puntúa a ×1.'
@@ -75,7 +96,7 @@ export default function Equipo() {
       : 'Tienes un A, un B y un C. Puedes cambiar a quien quieras hasta el prólogo.';
 
   return (
-    <main className="main" style={{ paddingBottom: 'calc(230px + var(--safe-bottom))' }}>
+    <main className="main" style={{ paddingBottom: 'calc(270px + var(--safe-bottom))' }}>
       <div>
         <h1 className="titulo">MI EQUIPO</h1>
         <div className="etiqueta" style={{ marginTop: 6 }}>Se puede cambiar hasta la salida del prólogo</div>
@@ -119,10 +140,21 @@ export default function Equipo() {
             {CATS.map((k) => {
               const p = picks[k] != null ? piloto(k, picks[k]) : null;
               return (
-                <button key={k} onClick={() => setCat(k)} style={{ border: `1px ${p ? 'solid' : 'dashed'} ${CAT_COLOR[k]}`, borderRadius: 8, padding: '5px 6px', minHeight: 42, background: 'transparent', textAlign: 'left' }}>
-                  <div className="cond" style={{ fontSize: 10, color: CAT_COLOR[k] }}>{CAT_CORTO[k]}{p?.nivel ? ` · ${p.nivel}` : ''}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: p ? 'var(--hueso)' : 'var(--gris)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p ? p.nombre : 'Falta'}</div>
-                </button>
+                <div key={k} style={{ position: 'relative' }}>
+                  <button onClick={() => setCat(k)} aria-label={`${CAT_CORTO[k]}: ${p ? p.nombre : 'sin elegir'}`}
+                    style={{ width: '100%', border: `1px ${p ? 'solid' : 'dashed'} ${p ? CAT_COLOR[k] : '#6B5E50'}`, outline: k === cat ? `2px solid ${CAT_COLOR[k]}` : 'none', borderRadius: 10, padding: '6px 4px', background: 'transparent', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                    {p ? <Avatar foto={p.foto} nombre={p.nombre} color={CAT_COLOR[k]} size={40} />
+                      : <span aria-hidden="true" style={{ width: 40, height: 40, borderRadius: '50%', border: '2px dashed #6B5E50', display: 'grid', placeItems: 'center', color: '#6B5E50', fontSize: 20 }}>+</span>}
+                    <span className="cond" style={{ fontSize: 10, color: CAT_COLOR[k], whiteSpace: 'nowrap' }}>{CAT_CORTO[k]}{p?.nivel ? ` · ${p.nivel}` : ''}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: p ? 'var(--hueso)' : 'var(--gris)', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p ? p.nombre.split(' ').slice(-1)[0] : 'Falta'}</span>
+                  </button>
+                  {p && (
+                    <button onClick={() => quitar(k)} aria-label={`Quitar a ${p.nombre}`} disabled={ocupado}
+                      style={{ position: 'absolute', top: -8, right: -6, width: 28, height: 28, borderRadius: '50%', border: '2px solid #110E0B', background: 'var(--terra)', color: 'var(--hueso)', display: 'grid', placeItems: 'center', padding: 0, fontSize: 14, fontWeight: 700, lineHeight: 1 }}>
+                      ✕
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
