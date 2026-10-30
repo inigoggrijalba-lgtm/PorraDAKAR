@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDatos } from '../App.jsx';
 import { rpc } from '../api.js';
 import { CAT_COLOR } from '../config.js';
-import { Cargando } from '../ui.jsx';
+import { Avatar, Cargando } from '../ui.jsx';
 import { etapaNombre, fecha, hora } from '../util.js';
 
 // Bibs de mis pilotos, con la "API" de la que vienen (M = motos, A = coches y camiones)
@@ -49,21 +49,41 @@ export function Noticia({ n, mia, abierta: abiertaIni = false }) {
       </a>
     );
   }
+  const caras = (n.pilotos || []).filter((p) => p.foto || p.nombre);
   return (
-    <div className="fila" style={{ display: 'block', cursor: 'pointer' }} onClick={() => setAbierta(!abierta)} role="button" tabIndex={0}
+    <div className="fila" style={{ alignItems: 'flex-start', cursor: 'pointer' }} onClick={() => setAbierta(!abierta)} role="button" tabIndex={0}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setAbierta(!abierta)} aria-expanded={abierta}>
-      <div className="cab" style={{ alignItems: 'center' }}>
-        <EtiquetaNoticia n={n} mia={mia} />
-        <span className="mono peq gris">{hora(n.publicada)}</span>
-      </div>
-      <div style={{ fontWeight: 700, fontSize: 15, marginTop: 4 }}>{n.titulo}</div>
-      {abierta && n.imagen && <img src={n.imagen} alt="" loading="lazy" style={{ width: '100%', borderRadius: 10, marginTop: 8 }} />}
-      {n.texto && (
-        <div className={abierta ? '' : 'gris'} style={{ fontSize: 14, lineHeight: 1.45, marginTop: 4, whiteSpace: 'pre-line',
-          ...(abierta ? {} : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }) }}>
-          {n.texto}
+      {caras.length > 0 && <Caras caras={caras} />}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="cab" style={{ alignItems: 'center' }}>
+          <EtiquetaNoticia n={n} mia={mia} />
+          <span className="mono peq gris">{hora(n.publicada)}</span>
         </div>
-      )}
+        <div style={{ fontWeight: 700, fontSize: 15, marginTop: 4 }}>{n.titulo}</div>
+        {abierta && n.imagen && <img src={n.imagen} alt="" loading="lazy" style={{ width: '100%', borderRadius: 10, marginTop: 8 }} />}
+        {n.texto && (
+          <div className={abierta ? '' : 'gris'} style={{ fontSize: 14, lineHeight: 1.45, marginTop: 4, whiteSpace: 'pre-line',
+            ...(abierta ? {} : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }) }}>
+            {n.texto}
+          </div>
+        )}
+        {abierta && caras.length > 1 && (
+          <div className="peq gris" style={{ marginTop: 6 }}>Aparecen: {caras.map((c) => c.nombre).join(', ')}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Fotos de los pilotos que menciona la noticia (hasta 2 superpuestas y un +N)
+function Caras({ caras }) {
+  const [a, b] = caras;
+  const extra = caras.length - 2;
+  return (
+    <div style={{ position: 'relative', flex: 'none', width: b ? 54 : 42, height: b ? 52 : 42 }} aria-hidden="true">
+      <span style={{ position: 'absolute', left: 0, top: 0 }}><Avatar foto={a.foto} nombre={a.nombre} color={CAT_COLOR[a.cat]} size={40} /></span>
+      {b && <span style={{ position: 'absolute', left: 18, top: 16, borderRadius: '50%', boxShadow: '0 0 0 2px var(--tierra)' }}><Avatar foto={b.foto} nombre={b.nombre} color={CAT_COLOR[b.cat]} size={34} /></span>}
+      {extra > 0 && <span className="mono" style={{ position: 'absolute', left: -2, top: 34, fontSize: 10, background: 'var(--linea)', color: 'var(--hueso)', borderRadius: 8, padding: '0 4px' }}>+{extra}</span>}
     </div>
   );
 }
