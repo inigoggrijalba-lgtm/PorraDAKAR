@@ -1,5 +1,7 @@
 import { useDatos } from '../App.jsx';
-import { CAT_COLOR, CAT_CORTO, CATS, MULT } from '../config.js';
+import { CAT_COLOR, CAT_CORTO, CATS, MULT, NIVEL_COLOR } from '../config.js';
+
+const CAT_MINI = { GP: 'Rally GP', ULT: 'Ultimate', TRK: 'Camión', OBM: 'OBM' };
 import { Avatar, Cargando, Dunas, useAhora } from '../ui.jsx';
 import { cuentaAtras, etapaNombre, fecha, haceCuanto, puntos } from '../util.js';
 
@@ -23,12 +25,20 @@ function MiEquipo({ yo, enCarrera }) {
       <div className="card punteada">
         <div className="cab"><h2 className="h2">Tu equipo</h2><span className="mono">{eq.length} / 4</span></div>
         <div className="grid4" style={{ marginTop: 10 }}>
-          {CATS.map((c) => (
-            <div key={c} style={{ border: `1px ${por[c] ? 'solid' : 'dashed'} ${por[c] ? CAT_COLOR[c] : '#6B5E50'}`, borderRadius: 8, padding: 6, textAlign: 'center', minHeight: 48 }}>
-              <div className="cond" style={{ fontSize: 10, color: CAT_COLOR[c] }}>{CAT_CORTO[c]}{por[c]?.nivel ? ' · ' + por[c].nivel : ''}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: por[c] ? 'var(--hueso)' : 'var(--gris)' }}>{por[c] ? por[c].nombre.split(' ').slice(-1)[0] : 'Falta'}</div>
-            </div>
-          ))}
+          {CATS.map((c) => {
+            const p = por[c];
+            return (
+              <div key={c} style={{ border: `1px ${p ? 'solid' : 'dashed'} ${p ? CAT_COLOR[c] : '#6B5E50'}`, borderRadius: 10, padding: '8px 4px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ position: 'relative' }}>
+                  {p ? <Avatar foto={p.foto} nombre={p.nombre} color={CAT_COLOR[c]} size={52} />
+                    : <span aria-hidden="true" style={{ width: 52, height: 52, borderRadius: '50%', border: '2px dashed #6B5E50', display: 'grid', placeItems: 'center', color: '#6B5E50', fontSize: 24 }}>+</span>}
+                  {p?.nivel && <span className="badge" style={{ position: 'absolute', right: -6, bottom: -2, background: NIVEL_COLOR[p.nivel], fontSize: 10, padding: '1px 5px' }}>{p.nivel}</span>}
+                </div>
+                <div className="cond" style={{ fontSize: 10, color: CAT_COLOR[c], whiteSpace: 'nowrap' }}>{CAT_MINI[c]}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.1, color: p ? 'var(--hueso)' : 'var(--gris)', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p ? p.nombre.split(' ').slice(-1)[0] : 'Falta'}</div>
+              </div>
+            );
+          })}
         </div>
         <a className="btn" href="#/equipo" style={{ marginTop: 12, minHeight: 48 }}>{eq.length === 4 ? 'Cambiar equipo' : eq.length ? 'Completar equipo' : 'Hacer mi equipo'}</a>
         <p className="peq gris" style={{ textAlign: 'center', marginTop: 8 }}>Hasta la salida del prólogo nadie ve tu equipo.</p>
