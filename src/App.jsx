@@ -12,6 +12,7 @@ import Porra from './screens/Porra.jsx';
 import Agadir from './screens/Agadir.jsx';
 import Admin from './screens/Admin.jsx';
 import Noticias from './screens/Noticias.jsx';
+import Chat from './Chat.jsx';
 
 const Datos = createContext(null);
 export const useDatos = () => useContext(Datos);
@@ -81,6 +82,7 @@ export default function App() {
       <div className="app">
         {pantalla}
         {conNav && <Nav ruta={ruta === 'clasificacion' ? 'clasif' : ruta === 'noticias' ? 'inicio' : ruta} />}
+        {conNav && <Chat jugador={jug} pulso={datos.estado} oculto={ruta === 'equipo' && datos.estado?.equipos_abiertos} />}
         <Toast texto={toast} />
       </div>
     </Datos.Provider>

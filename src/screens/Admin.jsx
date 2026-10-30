@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { mensaje, rpc } from '../api.js';
-import { haceCuanto } from '../util.js';
+import { hora, haceCuanto } from '../util.js';
 
 export default function Admin() {
   const [clave, setClave] = useState(sessionStorage.getItem('porradakar.admin') || '');
@@ -67,7 +67,39 @@ export default function Admin() {
           </div>
         ))}
       </div>
+      <ChatAdmin clave={clave} />
       <button className="btn sec" onClick={entrar}>Actualizar</button>
     </main>
+  );
+}
+
+// Últimos mensajes del chat, con opción de ocultarlos
+function ChatAdmin({ clave }) {
+  const [msgs, setMsgs] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(() => { rpc('chat_leer', { p_desde: null }).then((m) => setMsgs((m || []).filter((x) => !x.robot).slice(-30).reverse())).catch(() => setMsgs([])); }, []);
+  async function ocultar(m) {
+    try {
+      await rpc('admin_ocultar_mensaje', { p_clave: clave, p_mensaje: m.id });
+      setMsgs((l) => l.filter((x) => x.id !== m.id));
+    } catch (e) {
+      setError(mensaje(e));
+    }
+  }
+  return (
+    <div className="card">
+      <div className="etiqueta" style={{ marginBottom: 4 }}>Chat · últimos mensajes</div>
+      {error && <div className="error peq">{error}</div>}
+      {msgs && msgs.length === 0 && <div className="peq gris">Nadie ha escrito todavía.</div>}
+      {(msgs || []).map((m) => (
+        <div key={m.id} className="fila" style={{ alignItems: 'flex-start' }}>
+          <div style={{ flex: 1, minWidth: 0, fontSize: 14 }}>
+            <span className="cond" style={{ color: m.color }}>{m.nombre}</span> <span className="mono peq gris">{hora(m.creado)}</span>
+            <div style={{ overflowWrap: 'anywhere' }}>{m.texto}</div>
+          </div>
+          <button className="chat-borrar" onClick={() => ocultar(m)}>Ocultar</button>
+        </div>
+      ))}
+    </div>
   );
 }

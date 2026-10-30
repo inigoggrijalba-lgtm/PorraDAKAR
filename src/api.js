@@ -51,6 +51,9 @@ const MENSAJES = {
   MISMO_PILOTO: 'Elige un piloto distinto.',
   MISMO_PILOTO_DOS_VECES: 'Ese piloto ya lo llevas en otra categoría.',
   OTRO_NIVEL: 'El sustituto tiene que ser del mismo nivel.',
+  MENSAJE_VACIO: 'Escribe algo antes de enviar.',
+  MENSAJE_LARGO: 'El mensaje es demasiado largo (máximo 500 caracteres).',
+  DEMASIADO_RAPIDO: 'Más despacio: espera un par de segundos.',
 };
 
 export const mensaje = (e) => MENSAJES[e && e.code] || 'Algo ha fallado. Vuelve a intentarlo.';
