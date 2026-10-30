@@ -92,6 +92,7 @@ async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' |
   const ultima = etapas.length ? Math.max(...etapas.map((e: any) => e.num)) : 13;
 
   const pilotos = new Map<string, any>();
+  const obm = new Set<number>(); // pilotos de Original by Motul: solo juegan en su categoría, no en Motos
   const prologo: Record<string, number> = {};
   let ultimaConGeneral = -1;
   const filas: any[] = [];
@@ -108,9 +109,10 @@ async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' |
         const cats = catsDe(api, clases[team.clazz] ?? '', team, ed);
         if (!cats.length) continue;
         const p = piloto(team);
+        if (api === 'M' && team?.is?.obm) obm.add(team.bib);
         for (const cat of cats) {
           const id = `${cat}:${team.bib}`;
-          if (!pilotos.has(id)) {
+          if (!pilotos.has(id) && !(cat === 'GP' && team?.is?.obm)) {
             pilotos.set(id, { edicion: ed, cat, bib: team.bib, nombre: clean(p.name) || `#${team.bib}`,
               nombre_completo: clean(`${p.firstName ?? ''} ${p.lastName ?? ''}`) || null, nacionalidad: p.nationality ?? null,
               foto: p.profil_sm ?? p.profil ?? null, marca: team.brand ?? null, modelo: team.model ?? null });
@@ -141,6 +143,7 @@ async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' |
       gen.forEach((x, i) => m.set(x.e.team.bib, { pos_general: i + 1, tiempo_general: x.t }));
       etp.forEach((x, i) => m.set(x.e.team.bib, { ...(m.get(x.e.team.bib) ?? {}), pos_etapa: i + 1, tiempo_etapa: x.t }));
       for (const [bib, v] of m) {
+        if (cat === 'GP' && obm.has(bib)) continue;
         filas.push({ edicion: ed, cat, etapa: s, bib, pos_etapa: v.pos_etapa ?? null, tiempo_etapa: v.tiempo_etapa ?? null,
           pos_general: v.pos_general ?? null, tiempo_general: v.tiempo_general ?? null, provisional: enCurso });
       }
