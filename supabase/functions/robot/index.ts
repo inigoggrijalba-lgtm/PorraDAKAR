@@ -65,6 +65,77 @@ function ultimaClave(obj: any): string | null {
   return ks.length ? ks.sort().pop()! : null;
 }
 
+// ---------- Noticias (crónicas y directo en español de la API oficial) ----------
+const ENT: Record<string, string> = { nbsp: ' ', amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“',
+  hellip: '…', ndash: '–', mdash: '—', laquo: '«', raquo: '»', euro: '€', deg: '°', iexcl: '¡', iquest: '¿' };
+function textoPlano(html: string): string {
+  return html
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|h\d|li)>/gi, '\n\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&([a-z]+);/gi, (m, n) => {
+      if (ENT[n.toLowerCase()]) return ENT[n.toLowerCase()];
+      const acc: Record<string, string> = { acute: '\u0301', grave: '\u0300', tilde: '\u0303', uml: '\u0308', circ: '\u0302', cedil: '\u0327' };
+      const k = Object.keys(acc).find((x) => n.length === x.length + 1 && n.endsWith(x));
+      return k ? (n[0] + acc[k]).normalize('NFC') : m;
+    })
+    .replace(/[ \t\u00a0]+/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/^\s*•\s*/, "")
+    .trim();
+}
+function catNoticia(grupo: string | null, etiqueta: string | null): string {
+  const g = (grupo ?? '').toUpperCase(), l = (etiqueta ?? '').toLowerCase();
+  if (l.includes('motul') || g === 'OBM') return 'OBM';
+  if (g === 'GP' || g === 'R2' || g === 'M') return 'GP';
+  if (g === 'T1') return 'ULT';
+  if (g === 'T5') return 'TRK';
+  if (!g) return 'GEN';
+  return 'OTRA';
+}
+
+async function noticias(ed: number, hasta: number) {
+  let total = 0;
+  for (let s = 0; s <= hasta; s++) {
+    let datos: any[] | null = null;
+    try {
+      const res = await fetch(`${API}publication_es-${ed}-${s}?t=${Date.now()}`, { headers: { 'User-Agent': UA, Accept: 'application/json' } });
+      if (res.status !== 200) continue;
+      datos = JSON.parse(await res.text());
+    } catch { continue; }
+    const filas: any[] = [];
+    for (const n of datos ?? []) {
+      if (n.locale && n.locale !== 'es') continue;
+      if (n.model === 'news' && n.title) {
+        const texto = textoPlano((n.text ?? []).filter((t: any) => t.templateType === 'Text').map((t: any) => t.content ?? '').join('\n'));
+        filas.push({ id: `n:${n.id ?? n._id}`, edicion: ed, etapa: n.stage ?? s, tipo: n.type === 'flm' ? 'flm' : 'liv',
+          cat: n.general ? 'GEN' : catNoticia(n.categoryGroup, n.categoryGroupLabel), grupo: n.categoryGroup ?? null,
+          grupo_nombre: n.categoryGroupLabel ?? null, titulo: clean(n.title), texto: texto || null, imagen: n.image ?? null, enlace: null,
+          destacada: !!(n.highlight || n.pinned || n.type === 'flm'),
+          bibs: JSON.stringify((n.competitors ?? []).filter((c: any) => c.bib != null).map((c: any) => ({ api: n.category ?? null, bib: c.bib }))),
+          publicada: n.publicationAt ?? null });
+      } else if (n.model === 'video' && n.name && n.link) {
+        filas.push({ id: `v:${n.id ?? n._id}`, edicion: ed, etapa: s, tipo: 'video', cat: 'GEN', grupo: n.category ?? null, grupo_nombre: null,
+          titulo: clean(n.name), texto: null, imagen: n.image ?? null, enlace: n.link, destacada: !!(n.highlight || n.isHighlight),
+          bibs: '[]', publicada: n.updatedAt ?? n.publicationAt ?? null });
+      }
+    }
+    const unicas = [...new Map(filas.map((f) => [f.id, f])).values()];
+    for (let i = 0; i < unicas.length; i += 200) {
+      const lote = unicas.slice(i, i + 200).map((f) => ({ ...f, bibs: sql.json(JSON.parse(f.bibs)) }));
+      await sql`insert into noticias ${sql(lote)} on conflict (id) do update set etapa = excluded.etapa, tipo = excluded.tipo, cat = excluded.cat,
+        grupo = excluded.grupo, grupo_nombre = excluded.grupo_nombre, titulo = excluded.titulo, texto = excluded.texto, imagen = excluded.imagen,
+        enlace = excluded.enlace, destacada = excluded.destacada, bibs = excluded.bibs, publicada = excluded.publicada`;
+    }
+    total += unicas.length;
+  }
+  return total;
+}
+
 async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' | 'misma' }) {
   const ed = ctx.edicion;
   const log: string[] = [];
@@ -221,7 +292,11 @@ async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' |
   if (ultimaConGeneral >= 0) {
     await sql`update config set ultima_etapa = ${ultimaConGeneral}, actualizado = now() where id = 1 and edicion = ${ed}`;
   }
-  const msg = `${ctx.modo === 'archivo' ? 'Archivo' : 'API'} ${ed}: ${lista.length} pilotos, ${filas.length} posiciones, última etapa con general ${ultimaConGeneral}, ${legend.size} LEGEND`;
+  let nNot = 0;
+  if (ctx.modo === 'api') {
+    try { nNot = await noticias(ed, ultima); } catch (e) { log.push(`Aviso noticias: ${(e as Error).message}`); }
+  }
+  const msg = `${ctx.modo === 'archivo' ? 'Archivo' : 'API'} ${ed}: ${lista.length} pilotos, ${filas.length} posiciones, última etapa con general ${ultimaConGeneral}, ${legend.size} LEGEND, ${nNot} noticias`;
   log.push(msg);
   for (const l of log) await sql`insert into robot_log (nivel, mensaje) values (${l.startsWith('Aviso') ? 'aviso' : 'info'}, ${l})`;
   return { ok: true, log };
@@ -236,7 +311,13 @@ Deno.serve(async (req) => {
   if (!cfg) return new Response(JSON.stringify({ error: 'SIN_CONFIGURAR' }), { status: 500 });
   const ctx: Ctx = { modo: body.modo === 'archivo' ? 'archivo' : 'api', edicion: Number(body.edicion ?? cfg.edicion) };
   try {
-    const r = await ejecutar(ctx, { niveles: body.niveles });
+    let r: any;
+    if (body.solo === 'noticias') {
+      const et = (await sql`select coalesce(max(num), 13) m from etapas where edicion = ${ctx.edicion}`)[0].m;
+      const n = await noticias(ctx.edicion, Number(et));
+      await sql`insert into robot_log (nivel, mensaje) values ('info', ${`Noticias ${ctx.edicion}: ${n}`})`;
+      r = { ok: true, noticias: n };
+    } else r = await ejecutar(ctx, { niveles: body.niveles });
     return new Response(JSON.stringify(r), { headers: { 'content-type': 'application/json' } });
   } catch (e) {
     const m = (e as Error).message;

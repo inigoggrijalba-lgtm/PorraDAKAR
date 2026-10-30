@@ -11,6 +11,7 @@ import Clasificacion from './screens/Clasificacion.jsx';
 import Porra from './screens/Porra.jsx';
 import Agadir from './screens/Agadir.jsx';
 import Admin from './screens/Admin.jsx';
+import Noticias from './screens/Noticias.jsx';
 
 const Datos = createContext(null);
 export const useDatos = () => useContext(Datos);
@@ -71,6 +72,7 @@ export default function App() {
   else if (ruta === 'porra') pantalla = <Porra />;
   else if (ruta === 'agadir') pantalla = <Agadir />;
   else if (ruta === 'admin') pantalla = <Admin />;
+  else if (ruta === 'noticias') pantalla = <Noticias params={params} />;
   else pantalla = <Inicio />;
 
   const conNav = hay && jug && !['entrar', 'usuarios', 'admin', 'agadir'].includes(ruta);
@@ -78,7 +80,7 @@ export default function App() {
     <Datos.Provider value={{ ...datos, jugador: jug, recargar, avisar }}>
       <div className="app">
         {pantalla}
-        {conNav && <Nav ruta={ruta === 'clasificacion' ? 'clasif' : ruta} />}
+        {conNav && <Nav ruta={ruta === 'clasificacion' ? 'clasif' : ruta === 'noticias' ? 'inicio' : ruta} />}
         <Toast texto={toast} />
       </div>
     </Datos.Provider>

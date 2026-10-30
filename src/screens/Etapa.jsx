@@ -3,6 +3,7 @@ import { useDatos } from '../App.jsx';
 import { rpc } from '../api.js';
 import { CATS } from '../config.js';
 import { Avatar, Cargando, Legend, Nivel, Tabs, tabsCat } from '../ui.jsx';
+import { UltimasNoticias } from './Noticias.jsx';
 import { diferencia, etapaNombre, fecha, haceCuanto, tiempo } from '../util.js';
 
 export default function Etapa({ params }) {
@@ -53,6 +54,8 @@ export default function Etapa({ params }) {
           <button key={x.num} className={'chip' + (x.num === n ? ' on' : '')} style={{ flex: 'none' }} onClick={() => setNum(x.num)}>{x.num === 0 ? 'Prólogo' : `E${x.num}`}</button>
         ))}
       </div>
+
+      <UltimasNoticias etapa={n} max={2} titulo={provisional ? 'En directo' : 'La crónica'} />
 
       <Tabs items={tabsCat(CATS)} valor={cat} onCambio={setCat} label="Categoría" />
 

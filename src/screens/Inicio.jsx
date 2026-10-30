@@ -3,6 +3,7 @@ import { CAT_COLOR, CAT_CORTO, CATS, MULT, NIVEL_COLOR, RECORRIDO_2027 } from '.
 
 const CAT_MINI = { GP: 'Motos', ULT: 'Ultimate', TRK: 'Camión', OBM: 'OBM' };
 import { Avatar, Cargando, Dunas, useAhora } from '../ui.jsx';
+import { UltimasNoticias } from './Noticias.jsx';
 import { cuentaAtras, etapaNombre, fecha, haceCuanto, puntos } from '../util.js';
 
 function Cabecera({ jugador, sub }) {
@@ -126,6 +127,7 @@ export default function Inicio() {
           ) : null}
         </div>
         <MiEquipo yo={yo} enCarrera={false} />
+        <UltimasNoticias titulo="Noticias" />
         <div className="card">
           <div className="cab"><h2 className="h2">El grupo</h2><span className="peq gris" style={{ fontSize: 13 }}>{completos} de {estado.jugadores} con equipo</span></div>
           <div style={{ height: 8, borderRadius: 4, background: 'var(--linea)', marginTop: 8, overflow: 'hidden' }}>
@@ -173,6 +175,7 @@ export default function Inicio() {
         </a>
       )}
       <MiEquipo yo={yo} enCarrera />
+      <UltimasNoticias />
       <MiniPorra porra={porra} jugador={jugador} />
       <p className="peq gris" style={{ textAlign: 'center' }}>Datos oficiales · actualizado {haceCuanto(estado.actualizado)}</p>
     </main>
@@ -180,6 +183,7 @@ export default function Inicio() {
 }
 
 
+const miles = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const DIAS_SEM = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 function Recorrido() {
   const R = RECORRIDO_2027;
@@ -190,7 +194,7 @@ function Recorrido() {
         <span className="peq gris" style={{ fontSize: 12 }}>9–23 ene 2027</span>
       </div>
       <div className="peq gris" style={{ fontSize: 12, margin: '4px 0 10px' }}>
-        Portugal y Marruecos · {R.total.toLocaleString('es-ES')} km, {R.especial.toLocaleString('es-ES')} cronometrados
+        Portugal y Marruecos · {miles(R.total)} km, {miles(R.especial)} cronometrados
       </div>
       {R.dias.map((d, i) => {
         const dt = new Date(d.f + 'T12:00:00');
