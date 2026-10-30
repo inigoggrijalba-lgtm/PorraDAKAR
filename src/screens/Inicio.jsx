@@ -2,7 +2,7 @@ import { useDatos } from '../App.jsx';
 import { CAT_COLOR, CAT_CORTO, CATS, MULT, NIVEL_COLOR, RECORRIDO_2027 } from '../config.js';
 
 const CAT_MINI = { GP: 'Motos', ULT: 'Ultimate', TRK: 'Camión', OBM: 'OBM' };
-import { Avatar, Cargando, Dunas, useAhora } from '../ui.jsx';
+import { Avatar, Cargando, Dunas, useAhora, abreFicha } from '../ui.jsx';
 import { UltimasNoticias } from './Noticias.jsx';
 import { cuentaAtras, etapaNombre, fecha, haceCuanto, puntos } from '../util.js';
 
@@ -19,6 +19,7 @@ function Cabecera({ jugador, sub }) {
 }
 
 function MiEquipo({ yo, enCarrera }) {
+  const { verPiloto } = useDatos();
   const eq = yo?.equipo || [];
   const por = Object.fromEntries(eq.map((p) => [p.cat, p]));
   if (!enCarrera) {
@@ -29,7 +30,7 @@ function MiEquipo({ yo, enCarrera }) {
           {CATS.map((c) => {
             const p = por[c];
             return (
-              <div key={c} style={{ border: `1px ${p ? 'solid' : 'dashed'} ${p ? CAT_COLOR[c] : '#6B5E50'}`, borderRadius: 10, padding: '8px 4px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <div key={c} {...(p ? abreFicha(() => verPiloto(c, p.bib)) : {})} style={{ cursor: p ? 'pointer' : undefined, border: `1px ${p ? 'solid' : 'dashed'} ${p ? CAT_COLOR[c] : '#6B5E50'}`, borderRadius: 10, padding: '8px 4px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div style={{ position: 'relative' }}>
                   {p ? <Avatar foto={p.foto} nombre={p.nombre} color={CAT_COLOR[c]} size={52} />
                     : <span aria-hidden="true" style={{ width: 52, height: 52, borderRadius: '50%', border: '2px dashed #6B5E50', display: 'grid', placeItems: 'center', color: '#6B5E50', fontSize: 24 }}>+</span>}
@@ -53,7 +54,7 @@ function MiEquipo({ yo, enCarrera }) {
       {eq.map((p) => {
         const act = p.cambio && yo ? p.cambio : null;
         return (
-          <div key={p.cat} className="fila">
+          <div key={p.cat} className="fila" {...abreFicha(() => verPiloto(p.cat, act ? act.bib : p.bib))}>
             <div style={{ width: 5, height: 36, borderRadius: 3, background: CAT_COLOR[p.cat] }} />
             <Avatar foto={p.foto} nombre={p.nombre} />
             <div style={{ flex: 1, minWidth: 0 }}>

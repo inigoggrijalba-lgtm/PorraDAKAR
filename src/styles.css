@@ -108,3 +108,5 @@ h1, h2, h3, p { margin: 0; }
 .chat-input { flex: 1; min-height: 46px; max-height: 120px; resize: none; border-radius: 23px; border: 1px solid var(--duna); background: var(--tierra); color: var(--hueso); padding: 12px 16px; font: inherit; font-size: 16px; outline: none; field-sizing: content; }
 .chat-enviar { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--arena); color: #17130F; display: grid; place-items: center; flex: none; cursor: pointer; }
 .chat-enviar:disabled { background: #6B5E50; }
+.btn-ficha { flex: none; width: 44px; height: 44px; border: 0; background: transparent; color: var(--gris); display: grid; place-items: center; border-radius: 50%; cursor: pointer; }
+.btn-ficha:hover, .btn-ficha:focus-visible { color: var(--arena); }

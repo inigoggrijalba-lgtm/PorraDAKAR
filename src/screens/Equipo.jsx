@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDatos } from '../App.jsx';
 import { mensaje, rpc } from '../api.js';
 import { CAT_COLOR, CAT_CORTO, CAT_NOMBRE, CATS, MULT, NIVEL_COLOR } from '../config.js';
-import { Avatar, Cargando, Legend, Tabs, tabsCat } from '../ui.jsx';
+import { Avatar, Cargando, Legend, Tabs, tabsCat, BotonFicha, abreFicha } from '../ui.jsx';
 
 const TITULO = { A: 'Nivel A · ×1 · los favoritos', B: 'Nivel B · ×1,5 · siguientes y Legends', C: 'Nivel C · ×2 · el resto', L: 'Libre · ×1' };
 
 export default function Equipo() {
-  const { estado, pilotos, yo, jugador, recargar, avisar } = useDatos();
+  const { estado, pilotos, yo, jugador, recargar, avisar, verPiloto } = useDatos();
   const [cat, setCat] = useState('GP');
   const [picks, setPicks] = useState(null);
   const [ocupado, setOcupado] = useState(false);
@@ -39,7 +39,7 @@ export default function Equipo() {
         <h1 className="titulo">MI EQUIPO</h1>
         <p className="gris">Los equipos se cerraron con la salida del prólogo.</p>
         {(yo?.equipo || []).map((p) => (
-          <div key={p.cat} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, borderColor: CAT_COLOR[p.cat] }}>
+          <div key={p.cat} className="card" {...abreFicha(() => verPiloto(p.cat, p.cambio ? p.cambio.bib : p.bib))} style={{ display: 'flex', alignItems: 'center', gap: 12, borderColor: CAT_COLOR[p.cat], cursor: 'pointer' }}>
             <Avatar foto={p.foto} nombre={p.nombre} size={48} />
             <div style={{ flex: 1 }}>
               <div className="cond" style={{ fontSize: 11, color: CAT_COLOR[p.cat] }}>{CAT_NOMBRE[p.cat]} · {p.nivel ? `nivel ${p.nivel} ${MULT[p.nivel]}` : 'libre ×1'}</div>
@@ -114,9 +114,11 @@ export default function Equipo() {
             <div className="card" style={{ padding: '2px 8px' }}>
               {visibles.map((p) => {
                 const sel = picks[cat] === p.bib;
+                const elegir = () => setPicks({ ...picks, [cat]: p.bib });
                 return (
-                  <button key={p.bib} className={'piloto-btn' + (sel ? ' sel' : '')} disabled={bloqueado} aria-pressed={sel}
-                    onClick={() => setPicks({ ...picks, [cat]: p.bib })}>
+                  <div key={p.bib} style={{ display: 'flex', alignItems: 'center' }}>
+                  <button className={'piloto-btn' + (sel ? ' sel' : '')} disabled={bloqueado} aria-pressed={sel}
+                    onClick={elegir}>
                     <Avatar foto={p.foto} nombre={p.nombre} size={36} />
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ display: 'block', fontSize: 14, fontWeight: 600 }}>{p.nombre}</span>
@@ -124,6 +126,10 @@ export default function Equipo() {
                     </span>
                     <Legend si={p.legend} />
                   </button>
+                  <BotonFicha nombre={p.nombre} onClick={() => verPiloto(cat, p.bib, {
+                    texto: sel ? 'Ya lo tienes elegido' : bloqueado ? `Nivel ${n} ya usado en otra categoría` : `Elegir a ${p.nombre}`,
+                    deshabilitado: sel || bloqueado, hacer: elegir })} />
+                  </div>
                 );
               })}
               {visibles.length < ps.length && (

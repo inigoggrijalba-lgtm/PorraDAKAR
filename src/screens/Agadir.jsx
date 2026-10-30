@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useDatos } from '../App.jsx';
 import { mensaje, rpc } from '../api.js';
 import { CAT_COLOR, CAT_CORTO, MULT } from '../config.js';
-import { Avatar, Cargando } from '../ui.jsx';
+import { Avatar, Cargando, BotonFicha } from '../ui.jsx';
 import { cuentaAtras, fecha } from '../util.js';
 
 export default function Agadir() {
-  const { estado, pilotos, yo, jugador, recargar, avisar } = useDatos();
+  const { estado, pilotos, yo, jugador, recargar, avisar, verPiloto } = useDatos();
   const [sale, setSale] = useState(null);
   const [entra, setEntra] = useState(null);
   const [ocupado, setOcupado] = useState(false);
@@ -78,11 +78,14 @@ export default function Agadir() {
           <div className="etiqueta">2 · ¿Quién entra?</div>
           <div className="card" style={{ padding: '2px 8px' }}>
             {candidatos.slice(0, 15).map((p) => (
-              <button key={p.bib} className={'piloto-btn' + (entra === p.bib ? ' sel' : '')} aria-pressed={entra === p.bib} onClick={() => setEntra(p.bib)}>
+              <div key={p.bib} style={{ display: 'flex', alignItems: 'center' }}>
+              <button className={'piloto-btn' + (entra === p.bib ? ' sel' : '')} aria-pressed={entra === p.bib} onClick={() => setEntra(p.bib)}>
                 <span className="mono arena" style={{ width: 30 }}>{p.pos_general ? `${p.pos_general}º` : '–'}</span>
                 <Avatar foto={p.foto} nombre={p.nombre} size={32} />
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{p.nombre}</span>
               </button>
+              <BotonFicha nombre={p.nombre} onClick={() => verPiloto(sale, p.bib, { texto: `Que entre ${p.nombre}`, hacer: () => setEntra(p.bib) })} />
+              </div>
             ))}
             {candidatos.length === 0 && <p className="gris peq" style={{ padding: 8 }}>No hay pilotos disponibles de ese nivel.</p>}
           </div>

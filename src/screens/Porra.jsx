@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useDatos } from '../App.jsx';
 import { CAT_COLOR, CAT_CORTO, MULT } from '../config.js';
-import { Avatar, Cargando } from '../ui.jsx';
+import { Avatar, Cargando, abreFicha } from '../ui.jsx';
 import { etapaNombre, puntos } from '../util.js';
 
 export default function Porra() {
-  const { porra, estado, jugador } = useDatos();
+  const { porra, estado, jugador, verPiloto } = useDatos();
   const [abierto, setAbierto] = useState(jugador?.id || null);
   if (!porra || !estado) return <main className="main"><h1 className="titulo">LA PORRA</h1><Cargando /></main>;
   const js = porra.jugadores;
@@ -64,7 +64,7 @@ export default function Porra() {
               {open && (
                 <div className="grid2" style={{ padding: '4px 6px 10px', gap: 6 }}>
                   {j.equipo.map((p) => (
-                    <div key={p.cat} style={{ background: 'var(--tierra2)', borderRadius: 8, padding: '6px 8px', outline: `1px solid ${CAT_COLOR[p.cat]}` }}>
+                    <div key={p.cat} {...abreFicha(() => verPiloto(p.cat, p.cambio ? p.cambio.bib : p.bib))} style={{ cursor: 'pointer', background: 'var(--tierra2)', borderRadius: 8, padding: '6px 8px', outline: `1px solid ${CAT_COLOR[p.cat]}` }}>
                       <div className="cond" style={{ fontSize: 10, color: CAT_COLOR[p.cat] }}>{CAT_CORTO[p.cat]} · {p.nivel ? `${p.nivel} ${MULT[p.nivel]}` : 'libre'}</div>
                       <div style={{ fontSize: 13, fontWeight: 600 }}>{p.cambio ? p.cambio.nombre : p.nombre}</div>
                       <div className="mono peq gris">{p.cambio ? `entra por ${p.nombre}` : p.abandono != null ? `abandono ${etapaNombre(p.abandono).toLowerCase()}` : p.pos_general ? `${p.pos_general}º` : ''}</div>

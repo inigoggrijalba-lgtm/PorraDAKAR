@@ -13,6 +13,7 @@ import Agadir from './screens/Agadir.jsx';
 import Admin from './screens/Admin.jsx';
 import Noticias from './screens/Noticias.jsx';
 import Chat from './Chat.jsx';
+import FichaPiloto from './FichaPiloto.jsx';
 
 const Datos = createContext(null);
 export const useDatos = () => useContext(Datos);
@@ -28,6 +29,9 @@ export default function App() {
   const [jug, setJug] = useState(activo());
   const [datos, setDatos] = useState({ estado: null, pilotos: null, porra: null, yo: null, error: null });
   const [toast, setToast] = useState('');
+  const [ficha, setFicha] = useState(null);
+  const verPiloto = useCallback((cat, bib, accion) => setFicha({ cat, bib, accion }), []);
+  const cerrarFicha = useCallback(() => setFicha(null), []);
 
   useEffect(() => {
     const f = () => { setRuta(leerRuta()); window.scrollTo(0, 0); };
@@ -78,11 +82,12 @@ export default function App() {
 
   const conNav = hay && jug && !['entrar', 'usuarios', 'admin', 'agadir'].includes(ruta);
   return (
-    <Datos.Provider value={{ ...datos, jugador: jug, recargar, avisar }}>
+    <Datos.Provider value={{ ...datos, jugador: jug, recargar, avisar, verPiloto }}>
       <div className="app">
         {pantalla}
         {conNav && <Nav ruta={ruta === 'clasificacion' ? 'clasif' : ruta === 'noticias' ? 'inicio' : ruta} />}
         {conNav && <Chat jugador={jug} pulso={datos.estado} oculto={ruta === 'equipo' && datos.estado?.equipos_abiertos} />}
+        {ficha && <FichaPiloto cat={ficha.cat} bib={ficha.bib} accion={ficha.accion} cerrar={cerrarFicha} />}
         <Toast texto={toast} />
       </div>
     </Datos.Provider>

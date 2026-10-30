@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { useDatos } from '../App.jsx';
 import { rpc } from '../api.js';
 import { CATS } from '../config.js';
-import { Avatar, Cargando, Legend, Nivel, Tabs, tabsCat } from '../ui.jsx';
+import { Avatar, Cargando, Legend, Nivel, Tabs, tabsCat, abreFicha } from '../ui.jsx';
 import { UltimasNoticias } from './Noticias.jsx';
 import { diferencia, etapaNombre, fecha, haceCuanto, tiempo } from '../util.js';
 
 export default function Etapa({ params }) {
-  const { estado, yo } = useDatos();
+  const { estado, yo, verPiloto } = useDatos();
   const [cat, setCat] = useState('GP');
   const [num, setNum] = useState(params.get('n') != null ? Number(params.get('n')) : null);
   const [datos, setDatos] = useState(null);
@@ -68,7 +68,7 @@ export default function Etapa({ params }) {
           {filas.map((f) => {
             const mio = mios.has(`${cat}:${f.bib}`);
             return (
-              <div key={f.bib} className={'fila' + (mio ? ' mia' : '')}>
+              <div key={f.bib} className={'fila' + (mio ? ' mia' : '')} {...abreFicha(() => verPiloto(cat, f.bib))}>
                 <span className="mono arena" style={{ width: 22 }}>{f.pos_etapa}</span>
                 <Avatar foto={f.foto} nombre={f.nombre} size={32} />
                 <div style={{ flex: 1, minWidth: 0 }}>
