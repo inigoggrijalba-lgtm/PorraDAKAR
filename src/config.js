@@ -4,8 +4,8 @@ export const SUPABASE_URL = 'https://hvqfcgatuiqoezhnlvfl.supabase.co';
 export const SUPABASE_KEY = 'sb_publishable_yW1E_4WwQXv0ho85MvU4Ww_0Bqp_Skx';
 
 export const CATS = ['GP', 'ULT', 'TRK', 'OBM'];
-export const CAT_NOMBRE = { GP: 'Rally GP', ULT: 'Ultimate', TRK: 'Camiones', OBM: 'Original by Motul' };
-export const CAT_CORTO = { GP: 'Rally GP', ULT: 'Ultimate', TRK: 'Camiones', OBM: 'OBM' };
+export const CAT_NOMBRE = { GP: 'Motos (Rally GP y Rally 2)', ULT: 'Ultimate', TRK: 'Camiones', OBM: 'Original by Motul' };
+export const CAT_CORTO = { GP: 'Motos', ULT: 'Ultimate', TRK: 'Camiones', OBM: 'OBM' };
 export const CAT_COLOR = { GP: '#E07A2E', ULT: '#5FB0C0', TRK: '#B5BE5C', OBM: '#CFC2AE' };
 export const NIVEL_COLOR = { A: '#E9B949', B: '#CFC2AE', C: '#E07A5F' };
 export const MULT = { A: '×1', B: '×1,5', C: '×2' };

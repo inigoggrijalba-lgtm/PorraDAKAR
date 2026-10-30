@@ -51,7 +51,7 @@ const piloto = (team: any) => (team?.competitors ?? []).find((c: any) => c.role 
 function catsDe(api: 'M' | 'A', ref: string, team: any, ed: number): Cat[] {
   const out: Cat[] = [];
   if (api === 'M') {
-    if (ref.includes(`${ed}-M-GP`)) out.push('GP');
+    if (ref.includes(`${ed}-M-GP`) || ref.includes(`${ed}-M-R2`)) out.push('GP'); // Motos: Rally GP + Rally 2
     if (team?.is?.obm) out.push('OBM');
   } else {
     if (ref.startsWith(`${ed}-A-T1`)) out.push('ULT');
@@ -65,7 +65,7 @@ function ultimaClave(obj: any): string | null {
   return ks.length ? ks.sort().pop()! : null;
 }
 
-async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' }) {
+async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' | 'misma' }) {
   const ed = ctx.edicion;
   const log: string[] = [];
 
@@ -209,7 +209,9 @@ async function ejecutar(ctx: Ctx, opciones: { niveles?: 'anterior' | 'prologo' }
         }
       }
     }
-    await sql`select privado.calcular_niveles(${ed})`;
+    if (opciones.niveles === 'misma') await sql`select privado.niveles_desde(${ed}, ${ed})`;
+    else if (opciones.niveles === 'anterior') await sql`select privado.niveles_desde(${ed}, ${ed - 1})`;
+    else await sql`select privado.calcular_niveles(${ed})`;
     log.push('Niveles recalculados');
   }
 

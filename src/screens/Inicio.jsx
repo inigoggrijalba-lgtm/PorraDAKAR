@@ -1,7 +1,7 @@
 import { useDatos } from '../App.jsx';
 import { CAT_COLOR, CAT_CORTO, CATS, MULT, NIVEL_COLOR } from '../config.js';
 
-const CAT_MINI = { GP: 'Rally GP', ULT: 'Ultimate', TRK: 'Camión', OBM: 'OBM' };
+const CAT_MINI = { GP: 'Motos', ULT: 'Ultimate', TRK: 'Camión', OBM: 'OBM' };
 import { Avatar, Cargando, Dunas, useAhora } from '../ui.jsx';
 import { cuentaAtras, etapaNombre, fecha, haceCuanto, puntos } from '../util.js';
 

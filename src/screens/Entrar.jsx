@@ -61,7 +61,7 @@ export default function Entrar({ params }) {
         </div>
         <div className="etiqueta">La porra en 30 segundos</div>
         {[
-          ['Elige 4 pilotos:', 'Rally GP, Ultimate y camión (uno A, uno B y uno C) y uno libre de Original by Motul.'],
+          ['Elige 4 pilotos:', 'moto, Ultimate y camión (uno A, uno B y uno C) y uno libre de Original by Motul.'],
           ['Suman por la general final', '(×1, ×1,5 o ×2 según su nivel) y +3 por cada etapa ganada.'],
           ['En Agadir', 'puedes cambiar un piloto; el nuevo puntúa al 50%.'],
         ].map(([b, t], i) => (

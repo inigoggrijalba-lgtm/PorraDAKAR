@@ -71,7 +71,7 @@ export default function Equipo() {
   const lista = porCat[cat];
   const grupos = cat === 'OBM' ? [['L', lista]] : ['A', 'B', 'C'].map((n) => [n, lista.filter((p) => p.nivel === n)]);
   const hint = cat === 'OBM' ? 'Original by Motul es libre: elige a quien quieras, puntúa a ×1.'
-    : faltan.length ? `Necesitas un A, un B y un C entre Rally GP, Ultimate y Camiones. Te falta: ${faltan.join(', ')}.`
+    : faltan.length ? `Necesitas un A, un B y un C entre Motos, Ultimate y Camiones. Te falta: ${faltan.join(', ')}.`
       : 'Tienes un A, un B y un C. Puedes cambiar a quien quieras hasta el prólogo.';
 
   return (

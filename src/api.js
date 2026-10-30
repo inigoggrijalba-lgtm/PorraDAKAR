@@ -45,10 +45,11 @@ const MENSAJES = {
   EQUIPOS_CERRADOS: 'Los equipos ya están cerrados.',
   FALTA_PILOTO: 'Te falta algún piloto.',
   PILOTO_NO_VALIDO: 'Ese piloto no está en la lista.',
-  NIVELES_NO_VALIDOS: 'Necesitas un piloto A, uno B y uno C entre Rally GP, Ultimate y Camiones.',
+  NIVELES_NO_VALIDOS: 'Necesitas un piloto A, uno B y uno C entre Motos, Ultimate y Camiones.',
   AGADIR_CERRADO: 'El mercado de Agadir no está abierto.',
   SIN_EQUIPO: 'No tienes piloto en esa categoría.',
   MISMO_PILOTO: 'Elige un piloto distinto.',
+  MISMO_PILOTO_DOS_VECES: 'Ese piloto ya lo llevas en otra categoría.',
   OTRO_NIVEL: 'El sustituto tiene que ser del mismo nivel.',
 };
 
