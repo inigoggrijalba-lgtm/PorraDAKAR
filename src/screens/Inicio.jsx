@@ -1,5 +1,5 @@
 import { useDatos } from '../App.jsx';
-import { CAT_COLOR, CAT_CORTO, CATS, MULT, NIVEL_COLOR } from '../config.js';
+import { CAT_COLOR, CAT_CORTO, CATS, MULT, NIVEL_COLOR, RECORRIDO_2027 } from '../config.js';
 
 const CAT_MINI = { GP: 'Motos', ULT: 'Ultimate', TRK: 'Camión', OBM: 'OBM' };
 import { Avatar, Cargando, Dunas, useAhora } from '../ui.jsx';
@@ -107,8 +107,6 @@ export default function Inicio() {
   if (estado.equipos_abiertos) {
     const ca = cuentaAtras(estado.cierre_equipos);
     const completos = (porra?.jugadores || []).filter((j) => j.completo).length;
-    const desc = estado.etapa_descanso;
-    const hitos = [etapas.find((e) => e.num === 0), etapas.find((e) => e.num === 1), etapas.find((e) => e.num === desc + 1), etapas[etapas.length - 1]].filter(Boolean);
     return (
       <main className="main">
         <div className="hero" style={{ paddingBottom: 96, paddingTop: 'calc(22px + var(--safe-top))' }}>
@@ -134,17 +132,7 @@ export default function Inicio() {
             <div style={{ width: `${estado.jugadores ? (100 * completos) / estado.jugadores : 0}%`, height: 8, background: 'var(--duna)' }} />
           </div>
         </div>
-        {hitos.length > 0 && (
-          <div className="card">
-            <h2 className="h2" style={{ marginBottom: 6 }}>El recorrido</h2>
-            {hitos.map((e) => (
-              <div key={e.num} className="fila" style={{ justifyContent: 'space-between', fontSize: 13 }}>
-                <span>{fecha(e.fecha)} · {etapaNombre(e.num)}{e.num === desc + 1 ? ' (tras Agadir)' : ''}</span>
-                <span className="gris" style={{ textAlign: 'right' }}>{e.nombre}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <Recorrido />
       </main>
     );
   }
@@ -191,3 +179,37 @@ export default function Inicio() {
   );
 }
 
+
+const DIAS_SEM = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+function Recorrido() {
+  const R = RECORRIDO_2027;
+  return (
+    <div className="card">
+      <div className="cab">
+        <h2 className="h2">El recorrido</h2>
+        <span className="peq gris" style={{ fontSize: 12 }}>9–23 ene 2027</span>
+      </div>
+      <div className="peq gris" style={{ fontSize: 12, margin: '4px 0 10px' }}>
+        Portugal y Marruecos · {R.total.toLocaleString('es-ES')} km, {R.especial.toLocaleString('es-ES')} cronometrados
+      </div>
+      {R.dias.map((d, i) => {
+        const dt = new Date(d.f + 'T12:00:00');
+        const fechaTxt = `${DIAS_SEM[dt.getDay()]} ${dt.getDate()}`;
+        const especial = d.tipo === 'descanso' || d.tipo === 'ferri';
+        const nombre = d.tipo === 'descanso' ? 'Descanso' : d.tipo === 'ferri' ? 'Traslado' : d.num === 0 ? 'Prólogo' : `Etapa ${d.num}`;
+        return (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px 1fr auto', gap: 8, alignItems: 'baseline', padding: '6px 0', borderTop: i ? '1px solid var(--linea)' : 'none', fontSize: 13, background: d.tipo === 'descanso' ? 'rgba(232,168,76,.12)' : 'none', margin: d.tipo === 'descanso' ? '0 -8px' : 0, paddingLeft: d.tipo === 'descanso' ? 8 : 0, paddingRight: d.tipo === 'descanso' ? 8 : 0 }}>
+            <span className="mono gris" style={{ fontSize: 11 }}>{fechaTxt}</span>
+            <span>
+              <b style={{ fontWeight: especial ? 500 : 700, color: especial ? 'var(--gris2)' : undefined }}>{nombre}</b>
+              <span className="gris"> · {d.tramo}</span>
+              {d.maraton && <span className="peq" style={{ marginLeft: 6, fontSize: 10, color: 'var(--duna)' }}>MARATÓN</span>}
+            </span>
+            <span className="mono" style={{ fontSize: 12, textAlign: 'right' }}>{d.esp ? `${d.esp} km` : ''}</span>
+          </div>
+        );
+      })}
+      <div className="peq gris" style={{ fontSize: 11, marginTop: 8 }}>Km de especial cronometrada. Horarios y detalles se cargarán solos cuando la organización los publique.</div>
+    </div>
+  );
+}
